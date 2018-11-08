@@ -1,28 +1,44 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import * as tf from '@tensorflow/tfjs';
 
-class App extends Component {
+// Define Model
+const model = tf.sequential();
+model.add(tf.layers.dense({
+    units: 1,
+    inputShape:[2],
+    activation: 'sigmoid'
+}));
+
+// Set optmizer and loss
+model.compile({optimizer: tf.train.sgd(0.9), loss: 'meanSquaredError'});
+
+// Generic training data
+const xs = tf.tensor2d([[0, 0],[0.5, 0.5],[1, 1]]);
+const ys = tf.tensor2d([[1],[0.5],[0]]);
+
+// Train the model using the data
+model.fit(xs, ys, {
+    epochs: 1000,
+    callbacks: {
+      onEpochEnd: async (epoch, log) => {
+        console.log(`Epoch ${epoch}: loss = ${log.loss}`);
+      }
+    }
+  }
+).then(()=>{
+    console.log("*** Training Complete ***" );
+    console.log("--- Actual Values ---")
+    ys.print();
+    console.log("--- Prediction ---")
+    model.predict(xs).print()
+})
+
+export default class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <h1>An area to learn TensorFlow.js</h1>
       </div>
     );
   }
 }
-
-export default App;
